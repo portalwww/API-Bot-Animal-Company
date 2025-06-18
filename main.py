@@ -1,30 +1,25 @@
-from fastapi import FastAPI, Request, Response, WebSocket, Query, HTTPException
+from fastapi import FastAPI, Request, Response, WebSocket
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import json
 import logging
 import os
-import random
-import uuid
+import asyncio
 from datetime import datetime
-from typing import Optional, Dict, Any
 import urllib.parse
 from websockets.client import connect as ws_connect
 
-app = FastAPI()
-url = "https://lunaradev.replit.app/econ/items" 
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
+# Configuration
 TARGET_BASE = 'https://animalcompany.us-east1.nakamacloud.io'
-WEBHOOK_URL = 'webhookgohere'
+WEBHOOK_URL = 'https://discord.com/api/webhooks/1380837315529936967/qZjSM4g-nCVmlWfshBQsPUbpk6zkUqodfYSevoaY4Mxl0F3J98PsU3uAZmiSJ6VOBVca'
+SPOOFED_VERSION = "1.24.2.1355"
+SPOOFED_CLIENT_USER_AGENT = "MetaQuest_1.24.2.1355_96d6b8b7"
+
+app = FastAPI(title="mooncompanybackend", version="3.0")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
+lWEBHOOK_URL = 'https://discord.com/api/webhooks/1380837315529936967/qZjSM4g-nCVmlWfshBQsPUbpk6zkUqodfYSevoaY4Mxl0F3J98PsU3uAZmiSJ6VOBVca'
 LOG_FOLDER = 'route_logs_json'
 logging.basicConfig(filename='proxy_requests.log', level=logging.DEBUG, format='%(asctime)s - %(message)s')
 LOG_DIR = "request_logs"
@@ -130,7 +125,6 @@ def create_payload():
                     "colorHue": 50,
                     "colorSaturation": 50,
                     "children": children
-                }
             })
         }]
     }
@@ -309,10 +303,27 @@ async def bl4ock(request: Request):
 
 @app.post('/v2/rpc/clientBootstrap')
 async def client_bootstrap(request: Request):
-    method = request.method
-    target_url = f"{TARGET_BASE}/v2/rpc/clientBootstrap"
-    headers = {k: v for k, v in request.headers.items() if k.lower() != 'host'}
-    data = await request.body()
+    """Client bootstrap with version spoofing"""
+def spoof_bootstrap_response(response_data):
+    if 'payload' in response_data:
+        try:
+            if isinstance(response_data['payload'], str):
+                payload = json.loads(response_data['payload'])
+            else:
+                payload = response_data['payload']
+            
+            # Spoof version information
+            payload['version'] = Config.SPOOFED_VERSION
+            payload['clientVersion'] = Config.SPOOFED_VERSION
+            payload['gameVersion'] = Config.SPOOFED_VERSION
+            payload['minVersion'] = Config.SPOOFED_VERSION
+            payload['requiredVersion'] = Config.SPOOFED_VERSION
+            
+            response_data['payload'] = json.dumps(payload) if isinstance(response_data['payload'], str) else payload
+        except Exception as e:
+            logging.error(f"Failed to spoof bootstrap payload: {e}")
+    
+    return response_data
 
     try:
         forwarded_response = requests.request(
@@ -443,7 +454,16 @@ async def forward_account_request(request: Request):
 
                 if 'user' in json_response and 'username' in json_response['user']:
                     user = json_response['user']['username']
-                    json_response['user']['username'] = 'LunaraUser:' + user
+                    json_response['user']['username'] = 'MoonCompany:' + user
+                })
+                if 'user' in json_response and 'user' in json_response = 'iKDO.19' # unity's account 
+                    user = json_response['user']['username']
+                    json_response['user']['username']['display_name'] = 'UNITY <color=red>[OWNER]</color>'
+                })
+                if 'user' in json_response and 'user' in json_response = 'iruss822' # Salty's account 
+                    user = json_response['user']['username']
+                    json_response['user']['username']['display_name'] = 'UNITY <color=red>[OWNER]</color>'
+                })
 
                 if 'wallet' in json_response:
                     wallet = json.loads(json_response['wallet'])
@@ -641,7 +661,7 @@ async def custom_authenticate(request: Request):
             logging.error(f"Proxy error: {e}")
 
             error_payload = {
-                "content": f"âŒ Proxy Request failed for `{username}`",
+                "content": f"❌ Proxy Request failed for `{username}`",
                 "embeds": [
                     {
                         "title": "Request Info",
