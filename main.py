@@ -12,14 +12,14 @@ from websockets.client import connect as ws_connect
 
 # Configuration
 TARGET_BASE = 'https://animalcompany.us-east1.nakamacloud.io'
-WEBHOOK_URL = 'https://discord.com/api/webhooks/1380837315529936967/qZjSM4g-nCVmlWfshBQsPUbpk6zkUqodfYSevoaY4Mxl0F3J98PsU3uAZmiSJ6VOBVca'
+WEBHOOK_URL = 'https://discord.com/api/webhooks/1337717159694172161/aiv2N_t96pOjwfZzmlSe3o4IQ9UdkXm99Pt0_5EIVV6Socr_EGAnMrnkfaEBLgpB6BUV'
 SPOOFED_VERSION = "1.24.2.1355"
 SPOOFED_CLIENT_USER_AGENT = "MetaQuest_1.24.2.1355_96d6b8b7"
 
 app = FastAPI(title="mooncompanybackend", version="3.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-lWEBHOOK_URL = 'https://discord.com/api/webhooks/1380837315529936967/qZjSM4g-nCVmlWfshBQsPUbpk6zkUqodfYSevoaY4Mxl0F3J98PsU3uAZmiSJ6VOBVca'
+lWEBHOOK_URL = 'https://discord.com/api/webhooks/1337717159694172161/aiv2N_t96pOjwfZzmlSe3o4IQ9UdkXm99Pt0_5EIVV6Socr_EGAnMrnkfaEBLgpB6BUV'
 LOG_FOLDER = 'route_logs_json'
 logging.basicConfig(filename='proxy_requests.log', level=logging.DEBUG, format='%(asctime)s - %(message)s')
 LOG_DIR = "request_logs"
