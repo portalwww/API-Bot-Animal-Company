@@ -116,7 +116,7 @@ def catch_all(path):
         decoded_content = resp.content.decode('utf-8', errors='replace')
         log_route_data_json(path, method, decoded_data, decoded_content, resp.status_code, headers)
         return Response(resp.content, status=resp.status_code, headers=dict(resp.headers))
-
+@app.route('/v2/rpc/mining.balance', methods=['GET'])
     except Exception as e:
         traceback.print_exc()
         return "Internal Server Error", 500
