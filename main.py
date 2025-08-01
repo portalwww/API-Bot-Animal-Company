@@ -8,6 +8,8 @@ import json
 import logging
 import os
 import threading
+import time
+import random
 from datetime import datetime
 
 app = Flask(__name__)
@@ -18,19 +20,10 @@ session.mount('https://', HTTPAdapter(max_retries=retries))
 
 TARGET_BASE = 'https://animalcompany.us-east1.nakamacloud.io:443'
 
+file_lock = threading.Lock()
+
 LOG_FOLDER = 'logs'
 os.makedirs(LOG_FOLDER, exist_ok=True)
-
-# Example config/whitelist setup (you must replace these with real values or imports)
-ClientUserAgent = "MetaQuest 1.32.0.1514_abc54958"
-Version = {"version": "1.0"}
-SoftCurrency = 1000
-HardCurrency = 50
-ResearchPoints = 30
-BearerCache = ""
-Devlist = ["Xrenobys", "Xrenobys"]
-Whitelist = ["Xrenobys", "Xrenobys"]
-user = {"custom_id": "9009193225773786"}
 
 def log_route_data_json(route, method, request_body, response_body, status_code, headers):
     safe_route = route.replace('/', '_').strip('_')
@@ -49,6 +42,7 @@ def log_route_data_json(route, method, request_body, response_body, status_code,
     with open(filename, 'a', encoding='utf-8') as f:
         f.write(json.dumps(log_entry, indent=4) + ",\n")
 
+
 @app.route('/', defaults={'path': ''}, methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
 @app.route('/<path:path>', methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
 def catch_all(path):
@@ -60,49 +54,10 @@ def catch_all(path):
     headers.pop('Host', None)
 
     try:
-        if path == "v2/account":
-            b = json.loads(data)
-            if isinstance(b, dict):
-                b['clientUserAgent'] = ClientUserAgent
-                b['vars'] = Version
-                b['SoftCurrency'] = SoftCurrency
-                b['HardCurrency'] = HardCurrency
-                b['researchPoints'] = ResearchPoints
-
-                uname = b.get('Username', {}).get('DisplayName', "")
-
-                if uname in Devlist:
-                    b['IsDeveloper'] = True
-                    b['Username']['DisplayName'] = "OWNER: " + uname
-                elif uname in Whitelist:
-                    b['Username']['DisplayName'] = "BETA TESTER: " + uname
-                else:
-                    return jsonify("Failed Reason: Not WhiteListed"), 403
-
-                return jsonify({
-                    'user': {
-                        'id': 'bbd749c5-a8a2-4ff2-92d3-ce130eda01cd',
-                        'username': b['Username']['DisplayName'],
-                        'lang_tag': 'en',
-                        'metadata': json.dumps({'isDeveloper': True}),
-                        'edge_count': 4,
-                        'create_time': '2024-08-24T07:30:12Z',
-                        'update_time': '2025-04-05T21:00:27Z'
-                    },
-                    'wallet': json.dumps({
-                        "stashCols": 16,
-                        "stashRows": 8,
-                        "hardCurrency": HardCurrency,
-                        "softCurrency": SoftCurrency,
-                        "researchPoints": ResearchPoints
-                    }),
-                    'custom_id': user['custom_id']
-                })
-
-        elif path == "v2/account/authenticate/custom":
+        if path == "v2/account/authenticate/custom":
             b = json.loads(data.decode('utf-8', errors='replace'))
             if isinstance(b, dict) and 'vars' in b and isinstance(b['vars'], dict):
-                b['vars']['clientUserAgent'] = ClientUserAgent
+                b['vars']['clientUserAgent'] = "MetaQuest 1.32.0.1514_abc54958"
             resp = session.request(method, forward_url, headers=headers, data=json.dumps(b), params=params)
         else:
             resp = session.request(method, forward_url, headers=headers, data=data, params=params)
@@ -116,10 +71,9 @@ def catch_all(path):
         decoded_content = resp.content.decode('utf-8', errors='replace')
         log_route_data_json(path, method, decoded_data, decoded_content, resp.status_code, headers)
         return Response(resp.content, status=resp.status_code, headers=dict(resp.headers))
-@app.route('/v2/rpc/mining.balance', methods=['GET'])
-    except Exception as e:
-        traceback.print_exc()
-        return "Internal Server Error", 500
 
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return "Internal Server Error", 500
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0", port=6957)
