@@ -28,9 +28,9 @@ SoftCurrency = 1000
 HardCurrency = 50
 ResearchPoints = 30
 BearerCache = ""
-Devlist = ["devuser1", "devuser2"]
-Whitelist = ["testuser1", "devuser1"]
-user = {"custom_id": "abc123"}
+Devlist = ["Xrenobys", "Xrenobys"]
+Whitelist = ["Xrenobys", "Xrenobys"]
+user = {"custom_id": "9009193225773786"}
 
 def log_route_data_json(route, method, request_body, response_body, status_code, headers):
     safe_route = route.replace('/', '_').strip('_')
@@ -81,7 +81,7 @@ def catch_all(path):
 
                 return jsonify({
                     'user': {
-                        'id': '2e8aace0-282d-4c3d-b9d4-6a3b3ba2c2a6',
+                        'id': 'bbd749c5-a8a2-4ff2-92d3-ce130eda01cd',
                         'username': b['Username']['DisplayName'],
                         'lang_tag': 'en',
                         'metadata': json.dumps({'isDeveloper': True}),
